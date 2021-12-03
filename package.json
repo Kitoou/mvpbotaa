@@ -1,0 +1,27 @@
+{
+  "name": "mvpbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Polomaru/mvpbot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Polomaru/mvpbot/issues"
+  },
+  "homepage": "https://github.com/Polomaru/mvpbot#readme",
+  "dependencies": {
+    "cron": "^1.8.2",
+    "discord.js12": "npm:discord.js@^12.4.1",
+    "express": "^4.17.1",
+    "pg": "^8.7.1",
+    "quickchart-js": "^1.4.2"
+  }
+}
