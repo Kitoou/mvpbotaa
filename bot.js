@@ -31,25 +31,7 @@ app.get('/', function(request, response) {
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-const config = {
-  // ssl: true, 
-  port: 5432,
-  host: 'YOUR HOST',
-  user: 'USER',
-  password: 'PASSWORD',
-  database: 'DATABASE',
-  dialectOptions: {
-  ssl: {
-      require: true,
-      rejectUnauthorized: false,
-    },
-    keepAlive: true,        
-  },      
-  ssl: true,
-  define: {
-    timestamps: false,
-  },
-};
+
 
 const pool = new Pool(config);
 const graphic = new QuickChart()
