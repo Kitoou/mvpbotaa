@@ -66,7 +66,7 @@ const getMemberStats = async (memberid, message) => {
 
 const getMemberExp = async (memberid, message, days) => {
   try {
-      const res = await pool.query("select * from memberexpenses where member_id = '"+ memberid + "'");
+      const res = await pool.query("select * from memberexpenses where member_id = ?",[message], function(error, results){});
 
       let dic = res.rows;
 
@@ -88,8 +88,6 @@ const getMemberExp = async (memberid, message, days) => {
 
         if(check >= from && check <= to) bot.users.cache.get(message.author.id).send("**Pago** "+ parseInt(j+1) + "\n Día y hora: "+ dic[j]["timeregister"] + "\n Gasto: " + parseInt(dic[j]["expense"])+ "\n Tipo de moneda: " + dic[j]["moneytype"] + "\n Juego o descripción: " + dic[j]["game"]  + "\n\n");
       }
-      
-      // pool.end();
   } catch (e) {
       console.log(e);
   }
@@ -97,7 +95,7 @@ const getMemberExp = async (memberid, message, days) => {
 
 const getMemberT = async (memberid, message, days) => {
   try {
-      const res = await pool.query("select * from memberexpenses where member_id = '"+ memberid + "'");
+      const res = await pool.query("select * from memberexpenses where member_id = ?",[message], function(error, results){});
 
       let dic = res.rows;
       for(let j = 0; j < dic.length; j++)
@@ -115,7 +113,7 @@ const getGraphics = async (message, type) => {
   try {
     if (type == "porjuego") {
       // Query database
-      const res = await pool.query("select game, sum(expense) from memberexpenses where member_id = '"+ memberid + "' group by game");
+      const res = await pool.query("select game, sum(expense) from memberexpenses where member_id = ? group by game",[memberid], function(error, results){});
       let dic = res.rows;
       if (dic.length == 0) {
         bot.users.cache.get(message.author.id).send("No tienes pagos registrados")
@@ -156,7 +154,7 @@ const getGraphics = async (message, type) => {
 
 const sendmembers = async (number) => {
   try {
-      const res = await pool.query("select * from mfrequency where frequency = '"+ number + "'");
+      const res = await pool.query("select * from mfrequency where frequency = ?",[number], function(error, results){});
 
       let dic = res.rows;
       for(let j of dic)
