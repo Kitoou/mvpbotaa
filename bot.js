@@ -3,7 +3,7 @@ const Discord = require('discord.js12');
 const bot = new Client();
 const cron = require("cron");
 const QuickChart = require('quickchart-js');
-// box
+
 const token = 'Your token here';
 
 
@@ -24,7 +24,6 @@ app.get('/', function(request, response) {
 });
 
 
-// let tnow =  new Date().toLocaleString('en-US', {timeZone: "America/Lima"});
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 const config = {
@@ -58,10 +57,7 @@ const getMemberStats = async (memberid, message) => {
 
   try {
       const res = await pool.query("select * from mymember where member_id = '"+ memberid + "'");
-      // console.log(res)
-      // console.log(res.rows);
       bot.users.cache.get(message.author.id).send(res.rows);
-      // pool.end();
   } catch (e) {
       console.log(e);
   }
@@ -74,19 +70,21 @@ const getMemberExp = async (memberid, message, days) => {
 
       let dic = res.rows;
 
-      var nowstr = new Date().toLocaleString('en-US', {timeZone: "America/Lima"}).substring(0,10).split("/").map(x=>+x);
-
+      var nowstr = new Date().toLocaleString('en-US', {timeZone: "America/Lima"}).split(",");
+      nowstr = nowstr[0].split("/").map(x=>+x);
       var tempday = new Date(nowstr[2],nowstr[0]-1,nowstr[1]);
       tempday.setDate(tempday.getDate()-days);
-      tempday = tempday.toLocaleString('en-US').substring(0,10).split("/").map(x=>+x);
+      tempday = tempday.toLocaleString('en-US').split(",");
+      tempday = tempday[0].split("/").map(x=>+x);
 
       var from = new Date(tempday[2], tempday[0]-1, tempday[1]); 
       var to   = new Date(nowstr[2], nowstr[0]-1, nowstr[1]);
-
       for(let j = 0; j < dic.length; j++)
       {
-        var checkstr = (dic[j]["timeregister"]).substring(0,10).split("/").map(x=>+x);
+        var checkstr = (dic[j]["timeregister"]).split(",");
+        checkstr = checkstr[0].split("/").map(x=>+x);
         var check = new Date(checkstr[2], checkstr[0]-1, checkstr[1]);
+
 
         if(check >= from && check <= to) bot.users.cache.get(message.author.id).send("**Pago** "+ parseInt(j+1) + "\n Día y hora: "+ dic[j]["timeregister"] + "\n Gasto: " + parseInt(dic[j]["expense"])+ "\n Tipo de moneda: " + dic[j]["moneytype"] + "\n Juego o descripción: " + dic[j]["game"]  + "\n\n");
       }
@@ -107,7 +105,6 @@ const getMemberT = async (memberid, message, days) => {
         bot.users.cache.get(message.author.id).send("**Pago** "+ parseInt(j+1) + "\n Día y hora: "+ dic[j]["timeregister"] + "\n Gasto: " + parseInt(dic[j]["expense"])+ "\n Tipo de moneda: " + dic[j]["moneytype"] + "\n Juego o descripción: " + dic[j]["game"]  + "\n\n");
       }
       
-      // pool.end();
   } catch (e) {
       console.log(e);
   }
@@ -124,11 +121,11 @@ const getGraphics = async (message, type) => {
         bot.users.cache.get(message.author.id).send("No tienes pagos registrados")
       }
       // Parse data
-      labels = []
-      data = []
-      for (let i = 0; i < dic.length; i++) {
-        labels.push(dic[i]['game'])
-        data.push(dic[i]['sum'])
+      let labels = []
+      let data = []
+      for (let i of dic) {
+        labels.push(i['game'])
+        data.push(i['sum'])
       }
       const total = data.reduce((a, b) => parseInt(a) + parseInt(b)).toString()
       // Configure graphic
@@ -150,10 +147,7 @@ const getGraphics = async (message, type) => {
       const url = await graphic.getShortUrl()
       bot.users.cache.get(message.author.id).send(`${url}`)
     }
-  
-    if (type == "pormes") {
-  
-    }
+
   } catch (e) {
     console.log(e)
   }
@@ -165,11 +159,11 @@ const sendmembers = async (number) => {
       const res = await pool.query("select * from mfrequency where frequency = '"+ number + "'");
 
       let dic = res.rows;
-      for(let j = 0; j < dic.length; j++)
+      for(let j of dic)
       {
-        if(number == 1) bot.users.cache.get(dic[j][member_id]).send("Recordatorio diario si has tenido una compra en el último día.");
-        if(number == 2) bot.users.cache.get(dic[j][member_id]).send("Recordatorio semanal si has tenido una compra en la última semana.");
-        if(number == 3) bot.users.cache.get(dic[j][member_id]).send("Recordatorio mensual si has tenido una compra en el último mes.");
+        if(number == 1) bot.users.cache.get(j[member_id]).send("Recordatorio diario si has tenido una compra en el último día.");
+        if(number == 2) bot.users.cache.get(j[member_id]).send("Recordatorio semanal si has tenido una compra en la última semana.");
+        if(number == 3) bot.users.cache.get(j[member_id]).send("Recordatorio mensual si has tenido una compra en el último mes.");
       }
       
   } catch (e) {
@@ -183,7 +177,6 @@ const insertUser = async (memberid, date, message) => {
       const text = "INSERT INTO mymember(member_id, datecreate, actualstate) VALUES ("+"'"+memberid +"','"+date+"', 0)";
       const res = await pool.query(text);
       console.log(res)
-      // pool.end();
       bot.users.cache.get(message.author.id).send("Registrado");
   } catch (e) {
       console.log(e);
@@ -202,7 +195,6 @@ const insertFrec = async (memberid, frec, message) => {
       const text = "INSERT INTO mfrequency(member_id, frequency) VALUES ("+"'"+memberid +"',"+frec+")";
       const res = await pool.query(text);
       console.log(res)
-      // pool.end();
       bot.users.cache.get(message.author.id).send("Frecuencia registrada");
   } catch (e) {
       console.log(e);
@@ -226,16 +218,6 @@ const insertExp = async (memberid, expense, typemoney, game, time, message) => {
       bot.users.cache.get(message.author.id).send("Hubo un error al registrar");
   }
 };
-
-const insertBudget = async (memberid, game, amount) => {
-  try {
-    const text = "";
-    
-  } catch (e) {
-    console.log(e);
-    bot.users.cache.get(message.author.id).send("Hubo un error al crear el presupuesto");
-  }
-}
 
 bot.on('ready', async() =>{
   console.log(String(bot.user.username) + ' is online!');
@@ -289,7 +271,6 @@ bot.on('message',message=>{
         game = game.toLowerCase();
         insertExp(message.author.id.toString(), parseInt(args_list[1]), args_list[2], game, new Date().toLocaleString('en-US', {timeZone: "America/Lima"}), message);
       } catch (e) {
-      // console.log(e);
       }
     break;
     case "pagod":
@@ -302,7 +283,6 @@ bot.on('message',message=>{
         var dated = new Date(day[2], day[0]-1, day[1]);
         insertExp(message.author.id.toString(), parseInt(args_list[1]), args_list[2], game, dated.toLocaleString('en-US'), message);
       } catch (e) {
-        // console.log(e);
       }
     break;
     case "getpagos":
@@ -318,9 +298,8 @@ bot.on('message',message=>{
       try 
       {
         if(message.guild === null)
-          bot.users.cache.get(message.author.id).send("Intenta ingresar otro comando!").catch(error =>{});
+          bot.users.cache.get(message.author.id).send("Intenta ingresar otro comando!");
       } catch (e) {
-      // console.log(e);
       }
   }
 })
