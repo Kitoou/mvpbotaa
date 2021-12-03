@@ -11,7 +11,12 @@ const { Pool } = require('pg');
 const prefix = '*';
 
 var express = require('express');
-var app     = express();
+let app1 = express();  // Compliant
+app1.disable("x-powered-by");
+
+let helmet = require("helmet");
+let app = express(); // Compliant
+app.use(helmet.hidePoweredBy());
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -56,7 +61,7 @@ graphic
 const getMemberStats = async (memberid, message) => {
 
   try {
-      const res = await pool.query("select * from mymember where member_id = '"+ memberid + "'");
+      const res = await pool.query("select * from mymember where member_id = ?",[memberid]);
       bot.users.cache.get(message.author.id).send(res.rows);
   } catch (e) {
       console.log(e);
@@ -66,7 +71,7 @@ const getMemberStats = async (memberid, message) => {
 
 const getMemberExp = async (memberid, message, days) => {
   try {
-      const res = await pool.query("select * from memberexpenses where member_id = ?",[message], function(error, results){});
+      const res = await pool.query("select * from memberexpenses where member_id = ?",[message]);
 
       let dic = res.rows;
 
@@ -95,7 +100,7 @@ const getMemberExp = async (memberid, message, days) => {
 
 const getMemberT = async (memberid, message, days) => {
   try {
-      const res = await pool.query("select * from memberexpenses where member_id = ?",[message], function(error, results){});
+      const res = await pool.query("select * from memberexpenses where member_id = ?",[memberid]);
 
       let dic = res.rows;
       for(let j = 0; j < dic.length; j++)
@@ -113,7 +118,7 @@ const getGraphics = async (message, type) => {
   try {
     if (type == "porjuego") {
       // Query database
-      const res = await pool.query("select game, sum(expense) from memberexpenses where member_id = ? group by game",[memberid], function(error, results){});
+      const res = await pool.query("select game, sum(expense) from memberexpenses where member_id = ? group by game",[memberid]);
       let dic = res.rows;
       if (dic.length == 0) {
         bot.users.cache.get(message.author.id).send("No tienes pagos registrados")
@@ -154,7 +159,7 @@ const getGraphics = async (message, type) => {
 
 const sendmembers = async (number) => {
   try {
-      const res = await pool.query("select * from mfrequency where frequency = ?",[number], function(error, results){});
+      const res = await pool.query("select * from mfrequency where frequency = ?",[number]);
 
       let dic = res.rows;
       for(let j of dic)
